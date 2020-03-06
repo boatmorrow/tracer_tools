@@ -112,8 +112,9 @@ def solubility(gas,T,S=0):
 def schmidt(gas,T):
     '''calculate the Schmidt number, the ratio of the kinematic viscosity of water to the diffusion coefficient (for gas exchange)
     for the given gas, at temperature T in celcius.  Schmidt params taken from Raymond 2012.'''
-    sch_coeff_dict = {'He': [377.,- 19.15,0.501,- 0.0057],
-                     'Rn': [2939.,- 173.87,4.532,- 0.0468]}
+    sch_coeff_dict = {'He': [377.,- 19.15,0.501,- 0.0057],\
+                     'Rn': [2939.,- 173.87,4.532,- 0.0468],\
+                     'SF6':[3255.,- 217.13,6.837,- 0.0861]}
     A = sch_coeff_dict[gas][0]
     B = sch_coeff_dict[gas][1]
     C = sch_coeff_dict[gas][2]

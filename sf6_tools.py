@@ -79,5 +79,5 @@ def age_date(z_i,hemisphere='NH'):
     '''returns the year where the measured air mixing ratio is closest to the value z_i. 
     for the hemisphere of interest'''
     df = get_gas_conc()
-    Rech_year = N.argmin(abs(df['SF6'+hemisphere]-z_i)).year
+    Rech_year = N.idxmin(abs(df['SF6'+hemisphere]-z_i)).year
     return Rech_year

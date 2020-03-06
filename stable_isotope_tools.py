@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as N
 import datetime
 
-#module containing functionality for working with stable isotopes
+#module containing functionality for working with stable and radio isotopes of water
 class GNIP:
     '''GNIP class for working with downloaded GNIP data'''
     def __init__(self,name):
@@ -18,17 +18,17 @@ class GNIP:
     #read a GNIP spreadsheet
     def read_gnip(self,ifile):
         '''reads in a GNIP excel spreadsheed and fills out data for the GNIP class.  Timeseries data is a pandas dataframe'''
-        df = pd.read_excel(ifile,skiprows=0,header=0,parse_cols="K,O,Q,S,V,W,X")
+        df = pd.read_excel(ifile,usecols="M,Q,S,U,X,Y")
         df['Date'] = pd.to_datetime(df['Date'])
-        dt = pd.Timedelta('15 days')
+        #dt = pd.Timedelta('15 days')
         #pdb.set_trace()
-        for i in xrange(len(df)):
-            df['Date'].ix[i]=df['Date'].ix[i]+dt
-        df = df.set_index('Date')
-        self.data=df
+        #for i in xrange(len(df)):
+        #    df['Date'].ix[i]=df['Date'].ix[i]+dt
+        #df = df.set_index('Date')
+        #self.data=df
         #get site info
         df2 = pd.read_excel(ifile,header=0,parse_cols="A:F",index_col=None)
-        self.sitename = df2['Name of site'][0]
+        self.sitename = df2['Site'][0]
         self.latitude = df2['Latitude'][0]
         self.longitude = df2['Longitude'][0]
         self.elevation = df2['Altitude'][0]
@@ -79,6 +79,22 @@ class GNIP:
 #        alpha = (SpdT_w - dSp_w)/(dSp_s-SpdT_s)
 #        self.alpha = alpha
 #        return alpha
+    def read_gnip_csv(self,ifile):
+        '''reads in a GNIP csv and fills out data for the GNIP class.  Timeseries data is a pandas dataframe'''
+        df = pd.read_csv(ifile,usecols=[12,16,18,20,23,24])
+        df['Date'] = pd.to_datetime(df['Date'])
+        #dt = pd.Timedelta('15 days')
+        #pdb.set_trace()
+        #for i in xrange(len(df)):
+        #    df['Date'].ix[i]=df['Date'].ix[i]+dt
+        df = df.set_index('Date')
+        self.data=df
+        #get site info
+        df2 = pd.read_csv(ifile,header=0,usecols=[2,5,6,7],index_col=None)
+        self.sitename = df2['Site'][0]
+        self.latitude = df2['Latitude'][0]
+        self.longitude = df2['Longitude'][0]
+        self.elevation = df2['Altitude'][0]
 
 def weighted_iso_ts(precip_ts,gw_ts,alpha,tracer,iw_f='ps_func'):
     '''make an infiltration weighted time series according to equation 2.18 IAEA book ('iaea') or my modified and better equation 'ps_func', needs a preciptation pandas time index dataframe, a groundwater time indexed data frame with the the same tracer names, and the alpha=alpha_s/alpha_w partition coefficient.  Assumes northern hemisphere and two 6 month seasons. Return a data frame with all the precip data with an Iw_tracer column added which is the infiltration weighted infiltration isotope value.  Annual infil weighting only for tritium.  Suggest using an average alpha for H2 and O18.'''

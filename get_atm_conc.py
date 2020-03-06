@@ -15,20 +15,22 @@ import subprocess
 def concat_resampled_time_series(C_t_gas,C_t_isotopes,freq='M',hemisphere='NH'):
     '''returns a time series as a pandas DataRange of all the tracers at the frequency desired. Takes heterogeneous data with different dates and sampling intervals, resamples them.  It then combines them with an outer join, and fills missing data somewhat intelligently. For now inputs are cfc/sf6 pandas data frame and isotopes (stable and tritrium) dataframe indexed by time, but should be a list of the raw data files to process.  return ddff a pandas DataRange for the average concentrations in the atmosphere.  This function is really for making a multi tracer input - used to make a pflotran recharge condition right now.  Might should be moved to pflotran tools...'''
     #the tritium function needs to sussed out better.  I think I like my method for stable isotopes. But could also do the inverse distance weighted method as well.  For now I'm going to move to the isotope method, i.e. just extend in reverse using Vienna.  Probalbly the smartest way to do it is to figure out how to correlate Vienna and others to Bedrichov, then use that function to extend in reverse.  This also would allow for uncertainty analysis.
-    yearly_cfc = pandas.date_range(datetime.datetime(C_t_gas.index[0].year,1,1),datetime.datetime(C_t_gas.index[-1].year,1,1),freq=freq)
-    yearly_trit = pandas.date_range(datetime.datetime(C_t_isotopes.index[0].year,1,1),datetime.datetime(C_t_isotopes.index[-1].year,1,1),freq=freq)
+    #yearly_cfc = pd.date_range(datetime.datetime(C_t_gas.index[0].year,1,1),datetime.datetime(C_t_gas.index[-1].year,1,1),freq=freq)
+    #yearly_trit = pd.date_range(datetime.datetime(C_t_isotopes.index[0].year,1,1),datetime.datetime(C_t_isotopes.index[-1].year,1,1),freq=freq)
     
     # the grouped data 
-    cfc_grouped = df_cfc.groupby(yearly_cfc.asof);
-    trit_grouped = df_trit.groupby(yearly_trit.asof);
+    #cfc_grouped = C_t_gas.groupby(yearly_cfc.asof);
+    #trit_grouped = C_t_isotopes.groupby(yearly_trit.asof);
     
     # the mean of the groups
-    df_cfc_sampled = cfc_grouped.mean();
-    df_trit_sampled = trit_grouped.mean();
+    #df_cfc_sampled = cfc_grouped.mean();
+    #df_trit_sampled = trit_grouped.mean();
+    df_cfc_sampled = C_t_gas.resample('Y').mean()
+    df_trit_sampled = C_t_isotopes.resample('Y').mean()
 
     #put them together
-    ttseries = pandas.concat([df_cfc_sampled,df_trit_sampled],axis=1,join='outer');
-    #ttseries = pandas.concat([df_cfc,df_trit],axis=1,join='outer');
+    ttseries = pd.concat([df_cfc_sampled,df_trit_sampled],axis=1,join='outer')
+    #ttseries = pd.concat([df_cfc,df_trit],axis=1,join='outer');
     #now how to deal with the missing data issue!  My thoughts are first padd data series which haven't been updated with the most recent
     #and then fill the data for which we don't have historical data with a value which makes sense
     
@@ -36,7 +38,7 @@ def concat_resampled_time_series(C_t_gas,C_t_isotopes,freq='M',hemisphere='NH'):
     ddff = ttseries.fillna(method='pad') #rolls everything forward
     
     #now extend in reverse
-    ddff.fillna(method='bfill')
+    ddff.fillna(method='bfill',inplace=True)
     return ddff
 
 def convert2aqueous(ddff,T,P=1.,S=0.,addHe=True,addAr39=True,addKr81=True,hemisphere='NH'):

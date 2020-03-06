@@ -34,6 +34,7 @@ def make_conv_ts(C_t,tracer,t_vec,tau,lamba,disp_fac=.5,mod_type='exponential',t
 def conv_int_discrete(C_t,tracer,t_i,tau,lamba,disp_fac=.5,mod_type='exponential',trit_flag=0):
     """ Convulution integral program calculates the the concentration at observation time t_i (numpy datetime of the observation time)  as the convolution integral for a given model type. Needs the input concentration time series, C_t is a pandas data frame indexed by time with historical input, for example GNIP.data, tracer is the key for the tracer to be convolved, t_i (the observation time ), and aquifer mean age.  Returns the concentration at time t_i for the mean residence time tau."""
     #extend the data serie back in time
+    #pdb.set_trace()
     C_t_start = C_t[:C_t.index[0]]
     padding = int(tau*10) #for now will keep daily resolution, but this could an issue for long residence times.
     ix = pd.Index(numpy.arange(padding))
@@ -45,8 +46,11 @@ def conv_int_discrete(C_t,tracer,t_i,tau,lamba,disp_fac=.5,mod_type='exponential
         
     C_t_start = C_t_start.fillna(method='bfill')
     #only use concentration history before the sampling date
-    C_t = C_t[:t_i]
-    C_t_resampled = C_t.resample('D').sum().interpolate() #make sure we're at daily resolution everywhere - the sum is somehow needed and deals with time offset I think
+    #C_t = C_t[:t_i]
+    if C_t.index.freqstr != 'D':
+        C_t_resampled = C_t.resample('D').interpolate(method='time',inplace=False) #make sure we're at daily resolution
+    else:
+        C_t_resampled = C_t
     
     #calculate the length of the input record before the observation time in days    
     obs_lag = t_i-C_t.index[0]  
@@ -149,9 +153,13 @@ def conv_int_fft(C_t,tracer,t_i,tau,lamba,disp_fac=.5,mod_type='exponential',tri
         
     C_t_start = C_t_start.fillna(method='bfill')
     #only use concentration history before the sampling date
-    C_t = C_t[:t_i]
-    C_t_resampled = C_t.resample('D').sum().interpolate() #make sure we're at daily resolution everywhere - the sum is somehow needed and deals with time offset I think
+    #C_t = C_t[:t_i]
+    #C_t_resampled = C_t.resample('D').sum().interpolate() #make sure we're at daily resolution everywhere - the sum is somehow needed and deals with time offset I think
     #C_t_resampled = C_t_resampled.interpolate() # linear interpolation
+    if C_t.index.freqstr != 'D':
+        C_t_resampled = C_t.resample('D').interpolate(method='time',inplace=False) #make sure we're at daily resolution
+    else:
+        C_t_resampled = C_t
     ix2 = numpy.arange(len(C_t_start),len(C_t_start)+len(C_t_resampled)) #new int day index
     C_t_resampled['iix'] = ix2
     C_t_int = C_t_resampled.set_index(ix2)
@@ -268,6 +276,8 @@ def conv_int_fft(C_t,tracer,t_i,tau,lamba,disp_fac=.5,mod_type='exponential',tri
     tstart = t_i - dt
     ix = pd.DatetimeIndex(start=tstart,end=t_i,freq='D')
     C_t_c = pd.Series(C_t_c,index=ix)
+    print 'mean age = %1.2g' %(tau/365.)
+    print 'Conctration at ', t_i, '= %1.3g' %C_t_c[-1]
         
     return C_t_c
 
