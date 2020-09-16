@@ -113,7 +113,21 @@ def conv_int_discrete(C_t,tracer,t_i,tau,lamba,disp_fac=.5,mod_type='exponential
     if mod_type == 'dispersion':
         g_t = ((1./tau)/(numpy.sqrt(4.*numpy.pi*disp_fac*(lag_times/tau))))*(1./(lag_times/tau))*numpy.exp(-1.*(((1.-(lag_times/tau))**2)/(4.*disp_fac*(lag_times/tau))));
         # disp = dispersion parameter = 1/Pe = D/vx
-        
+    
+    #some specific half lives...
+    if tracer == 'H3':
+        t_half = 4500 #days from Lucas 2000
+        lamba = -1*numpy.log(0.5)/t_half
+
+    #add in exponential decay
+    #G_t = g_t*numpy.exp(-lamba*t_prime)
+
+    #accumulate if tritiogenic helium
+    if tracer == 'He3t':
+        t_half = 4500 #days from Lucas 2000
+        lamba = -1*numpy.log(0.5)/t_half
+    #    G_t = g_t*(1-numpy.exp(-lamba*t_prime))
+    
     # convolve - I think this is where a massive speed up could occur.
     C_t_i = 0;
     for k in range(len(lag_times)):
