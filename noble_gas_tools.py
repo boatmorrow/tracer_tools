@@ -293,6 +293,15 @@ def rayleigh_frac_oil_water(gas,T_sep,T_ref,S,Ar_frac,oil_type='light'):
     frac_i = frac_0*Ar_frac**(alpha-1);
     return frac_i
     
+def F_atm(C_i,C_n,gas='He4',norm_gas='Ar36'):
+    '''F_atm = F_atm(C_i, C_n, gas = 'He4', norm_gas = 'Ar36').  Calculate the fraction factor F = (C_i/C_n)_samp/(gas/norm_gas)_atm for the gas of interest using norm_gas as a the normalizer.
+           Inputs: C_i - gas mol fraction of interest in sample
+                   C_n - gas mol fraction of normgas in sample
+                   gas - key name for gas of interest.  Default is He4
+                   norm_gas - key name for norm gas.  Default is Ar36.'''
+    F_atm = (C_i/C_n)/(ng.get_atm_mol_frac(gas)/ng.get_atm_mol_frac(norm_gas))
+    return F_atm
+
 def F_w(C_i,C_Ar,gas,T,S):
     """ F_w_i = F_w(C_i,C_Ar,gas,T,S) returns the fractionation factor for gas_i (C_i/C_Ar)_sample/(C_i/C_Ar)_asw
     where the asw values are the equilibrium solubility concentrations for T the temp in celcius and S 
