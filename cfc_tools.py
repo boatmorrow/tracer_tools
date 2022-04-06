@@ -17,7 +17,7 @@ def update_gas_conc(url='http://cdiac.ess-dive.lbl.gov/ftp/oceans/CFC_ATM_Hist/C
     subprocess.call(['curl','-o','cfc_sf6_atm.txt',url])
 
 def update_gas_conc_hats(sf6_url='ftp://ftp.cmdl.noaa.gov/hats/sf6/combined/HATS_global_SF6.txt',cfc11_url='ftp://ftp.cmdl.noaa.gov/hats/cfcs/cfc11/combined/HATS_global_F11.txt',cfc12_url='ftp://ftp.cmdl.noaa.gov/hats/cfcs/cfc12/combined/HATS_global_F12.txt',cfc113_url='ftp://ftp.cmdl.noaa.gov/hats/cfcs/cfc113/combined/HATS_global_F113.txt'):
-    '''Grab the latest and greates sf6 and cfc gas concentrations.  The URL will need to be updated periodically.  Data from:
+    '''Grab the latest and greates sf6 and cfc gas concentrations.  The URL will need to be updated periodically.  Data from: NOAA
         Bullister, J.L. 2015. Atmospheric Histories (1765-2015) for CFC-11, CFC-12, CFC-113, CCl4, SF6 and N2O. NDP-095(2015). http://cdiac.ornl.gov/ftp/oceans/CFC_ATM_Hist/CFC_ATM_Hist_2015. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi: 10.3334/CDIAC/otg.CFC_ATM_Hist_2015.
         '''
     subprocess.call(['curl','-o','sf6_atm.txt',sf6_url])
@@ -26,22 +26,64 @@ def update_gas_conc_hats(sf6_url='ftp://ftp.cmdl.noaa.gov/hats/sf6/combined/HATS
     subprocess.call(['curl','-o','cfc113_atm.txt',cfc113_url])
 
 def get_gas_conc(f='cfc_sf6_atm.txt'):
-    df = pd.read_csv(f,header=0)
+    df = pd.read_csv(f,header=0, sep = '\t')
     units = df.loc[0]
     df = df.drop(0)
     #Fractional Years!
     ix = pd.date_range(datetime.datetime(int(df.loc[df.index[0]]['Year']),1,1),datetime.datetime(int(df.loc[df.index[-1]]['Year']),1,1),freq='AS')
     dt = pd.Timedelta(6,'M')
     ix = ix+dt
-    df = df.set_index(ix)
+    df = df.set_index(ix) 
     df = df.astype(N.float64)
     return df
 
 def get_cfc113_gas_conc_hats(f='cfc113_atm.txt'):
-    df = pd.read_csv('cfc113_atm.txt',header=0,comment='#',sep='\s+')
+    df = pd.read_csv(f,header=0,comment='#',sep='\s+')
     ix = pd.date_range(datetime.datetime(int(df.loc[df.index[0]]['HATS_F113_YYYY']),int(df.loc[df.index[0]]['HATS_F113_MM']),1),datetime.datetime(int(df.loc[df.index[- 1]]['HATS_F113_YYYY']),int(df.loc[df.index[-1]]['HATS_F113_MM']),1),freq='MS')
-    df = df.set_index(ix)
+    df = df.set_index(ix) ## sets index to the ix date range Year, Month
+    df = df[['HATS_F113_YYYY', 'HATS_NH_F113',  'HATS_SH_F113']]
+    df = df.resample('Y').mean()
+    df = df.rename(columns = {'HATS_F113_YYYY':'Year','HATS_NH_F113':'CFC113NH', 'HATS_SH_F113':'CFC113SH'})
+    df = pd.DataFrame(df)
+    df = df.to_csv('cfc113_atm.txt')
     return df
+
+def get_cfc11_gas_conc_hats(f='cfc11_atm.txt'):
+    df = pd.read_csv(f ,header=0,comment='#',sep='\s+')
+    ix = pd.date_range(datetime.datetime(int(df.loc[df.index[0]]['HATS_F11_YYYY']),int(df.loc[df.index[0]]['HATS_F11_MM']),1),datetime.datetime(int(df.loc[df.index[- 1]]['HATS_F11_YYYY']),int(df.loc[df.index[-1]]['HATS_F11_MM']),1),freq='MS')
+    df = df.set_index(ix)
+    df = df[['HATS_F11_YYYY', 'HATS_NH_F11',  'HATS_SH_F11']]
+    df = df.resample('Y').mean()
+    df = df.astype(N.float64)
+    df = df.rename(columns = {'HATS_F11_YYYY':'Year','HATS_NH_F11':'CFC11NH', 'HATS_SH_F11':'CFC11SH'})
+    df = pd.DataFrame(df)
+    df = df.to_csv('cfc11_atm.txt')
+    return df
+
+def get_cfc12_gas_conc_hats(f='cfc12_atm.txt'):
+    df = pd.read_csv(f,header=0,comment='#',sep='\s+')
+    ix = pd.date_range(datetime.datetime(int(df.loc[df.index[0]]['HATS_F12_YYYY']),int(df.loc[df.index[0]]['HATS_F12_MM']),1),datetime.datetime(int(df.loc[df.index[- 1]]['HATS_F12_YYYY']),int(df.loc[df.index[-1]]['HATS_F12_MM']),1),freq='MS')
+    df = df.set_index(ix)
+    df = df[['HATS_F12_YYYY', 'HATS_NH_F12',  'HATS_SH_F12']]
+    df = df.resample('Y').mean()
+    df = df. astype(N.float64)
+    df = df.rename(columns = {'HATS_F12_YYYY':'Year','HATS_NH_F12':'CFC12NH', 'HATS_SH_F12':'CFC12SH'})
+    df = pd.DataFrame(df)
+    df = df.to_csv('cfc12_atm.txt')
+    return df
+
+def get_sf6_gas_conc_hats(f='sf6_atm.txt'):
+    df = pd.read_csv(f,header=0,comment='#',sep='\s+')
+    ix = pd.date_range(datetime.datetime(int(df.loc[df.index[0]]['GMD_SF6_YYYY']),int(df.loc[df.index[0]]['GMD_SF6_MM']),1),datetime.datetime(int(df.loc[df.index[- 1]]['GMD_SF6_YYYY']),int(df.loc[df.index[-1]]['GMD_SF6_MM']),1),freq='MS')
+    df = df.set_index(ix)
+    df = df[['GMD_SF6_YYYY', 'GMD_NH_SF6',  'GMD_SH_SF6']]
+    df = df.resample('Y').mean()
+    df = df.astype(N.float64)
+    df = df.rename(columns = {'GMD_SF6_YYYY':'Year','GMD_NH_SF6':'SF6NH', 'GMD_SH_SF6':'SF6SH'})
+    df = pd.DataFrame(df)
+    df = df.to_csv('sf6_atm.txt')
+    return df
+
 
 def vapor_pressure_atm(T):
     """returns the vapor pressure using nobe gas tools module - uses Antione equation.  See
