@@ -132,7 +132,7 @@ def k600(Q,V,D,S,eqn=1):
         k600 = 4725.*(V*S)**0.86*Q**-.14*D**0.6
         return k600
     else:
-        print "equation not programmed, no k600 calculated."
+        print ("equation not programmed, no k600 calculated.")
     
 def solubility_oil(gas,T,oil_type='light'):
     '''calculates the Henry's coefficient in atm Kg_oil/mol for gas i at temperature T in celcius.  Equations taken from 
@@ -394,8 +394,8 @@ def import_UU_gas_data(ifile,samp_type='diff_samp'):
         samp_dict['samp_id'] = sheet.cell_value(1,0)
     else:
         samp_dict['samp_id'] = sheet.cell_value(1,5)
-    print 'File Name = ' + ifile
-    print 'Sample Id = ' + samp_dict['samp_id']
+    print ('File Name = ' + ifile)
+    print ('Sample Id = ' + samp_dict['samp_id'])
     T = float(input('Sampling temperature = '))
     TDG = float(input('Sample total dissolved gas pressure (mmHg) = '))
     TDG_GPa = TDG/760*0.000101325
@@ -409,10 +409,10 @@ def import_UU_gas_data(ifile,samp_type='diff_samp'):
                 names[i]=names[i].split()[0]
                 conc_names.append(names[i][1::]) 
         elif samp_type=='cu_tube':
-            print 'cu_tube not yet implemented'
+            print ('cu_tube not yet implemented')
             return
         else:
-            print 'sample type not available, must be diff_samp or cu_tube'
+            print ('sample type not available, must be diff_samp or cu_tube')
             return
 
     if int(samp_dict['runid'][-4:-2])==12:
@@ -424,10 +424,10 @@ def import_UU_gas_data(ifile,samp_type='diff_samp'):
                 names[i]=names[i].split()[0]
                 conc_names.append(names[i][1::]) 
         elif samp_type=='cu_tube':
-            print 'sample type not available, must be diff_samp or cu_tube'
+            print ('sample type not available, must be diff_samp or cu_tube')
             return
         else:
-            print 'sample type not available, must be diff_samp or cu_tube'
+            print ('sample type not available, must be diff_samp or cu_tube')
             return
     
     if int(samp_dict['runid'][-4:-2])>=13:
@@ -441,7 +441,7 @@ def import_UU_gas_data(ifile,samp_type='diff_samp'):
             conc_names = sheet.row_values(7,start_colx=1,end_colx=31)
             conc_values = sheet.row_values(8,start_colx=1,end_colx=31)
         else:
-            print 'sample type not available, must be diff_samp or cu_tube'
+            print ('sample type not available, must be diff_samp or cu_tube')
             return
     for i in xrange(len(names)):
         mole_frac[names[i]]=values[i]

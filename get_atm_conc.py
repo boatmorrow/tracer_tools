@@ -41,7 +41,7 @@ def concat_resampled_time_series(C_t_gas,C_t_isotopes,freq='M',hemisphere='NH'):
     ddff.fillna(method='bfill',inplace=True)
     return ddff
 
-def convert2aqueous(ddff,T,P=1.,S=0.,addHe=True,addAr39=True,addKr81=True,hemisphere='NH'):
+def convert2aqueous(ddff,T,P=1.,S=0.,addHe=False,addAr39=False,addKr81=False,hemisphere='NH'):
     '''converts the atm mixing ratio's in ddff returned from MakeTotalTimeSeries to aqueous concentrations (for gases only)
     as a function of the given temperature pressure and salinity.'''
     ddff_aq = ddff.copy();
@@ -85,16 +85,16 @@ def convert2molality(ddff_aq):
     ddff_aq_molal['CFC12'] = ddff_aq_molal['CFC12'].map(f);
     ddff_aq_molal['CFC113'] = ddff_aq_molal['CFC113'].map(f);
     #convert trit
-    ddff_aq_molal['trit TU'] = ddff_aq_molal['trit TU'].map(tu2mol_kg);
+    ##ddff_aq_molal['trit TU'] = ddff_aq_molal['trit TU'].map(tu2mol_kg);
     #convert sf6
     f = lambda x: float(x)*1.e-15;
     ddff_aq_molal['SF6'] = ddff_aq_molal['SF6'].map(f);
     #convert He
     f = lambda x: float(x)/22414.*1000.
-    ddff_aq_molal['He4']=ddff_aq_molal['He4'].map(f);
-    ddff_aq_molal['He3']=ddff_aq_molal['He3'].map(f);
-    ddff_aq_molal['Ar39']=ddff_aq_molal['Ar39'].map(f);
-    ddff_aq_molal['Kr81']=ddff_aq_molal['Kr81'].map(f)
+    ##ddff_aq_molal['He4']=ddff_aq_molal['He4'].map(f);
+    ##ddff_aq_molal['He3']=ddff_aq_molal['He3'].map(f);
+    ##ddff_aq_molal['Ar39']=ddff_aq_molal['Ar39'].map(f);
+    ##ddff_aq_molal['Kr81']=ddff_aq_molal['Kr81'].map(f)
     #should rename the columns here, so the writing a constraint list works better for plotran
     #this would look something like
     ddff_aq_molal = ddff_aq_molal.rename(columns={'cfc11':'CFC11','cfc12':'CFC12','cfc113':'CFC113','SF6 (ppt)':'SF6','trit TU':'H3'});
